@@ -1,0 +1,9 @@
+micronaut:
+  application:
+    name: mnStockBroker
+  server:
+    port: 8082
+
+hello:
+  controller:
+    path: "/helloFromConfig"
