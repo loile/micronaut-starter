@@ -12,14 +12,13 @@ import javax.inject.Inject;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @MicronautTest
-public class MnStockBrokerTest {
+public class HelloWorldControllerTest {
 
     @Inject
     EmbeddedApplication<?> application;
 
     @Inject
-    @Client("/")
-    private RxHttpClient client;
+    @Client("/") RxHttpClient client;
 
     @Test
     void testItWorks() {

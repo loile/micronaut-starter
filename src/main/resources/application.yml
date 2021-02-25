@@ -7,3 +7,7 @@ micronaut:
 hello:
   controller:
     path: "/helloFromConfig"
+  config:
+    greeting:
+      de: "Halo"
+      en: "Hello"
