@@ -21,6 +21,8 @@
     <exec.mainClass>com.mn.Application</exec.mainClass>
     <micronaut.runtime>netty</micronaut.runtime>
     <micronaut.aws.version>2.2.5</micronaut.aws.version>
+    <lombok.version>1.18.12</lombok.version>
+    <assertj-core.version>3.18.1</assertj-core.version>
   </properties>
 
   <repositories>
@@ -85,6 +87,14 @@
       <artifactId>micronaut-test-junit5</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -100,6 +110,11 @@
           <!-- Uncomment to enable incremental compilation -->
           <!-- <useIncrementalCompilation>false</useIncrementalCompilation> -->
           <annotationProcessorPaths combine.children="append">
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
           </annotationProcessorPaths>
           <compilerArgs>
             <arg>-Amicronaut.processing.group=com.mn</arg>
