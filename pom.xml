@@ -23,6 +23,7 @@
     <micronaut.aws.version>2.2.5</micronaut.aws.version>
     <lombok.version>1.18.12</lombok.version>
     <assertj-core.version>3.18.1</assertj-core.version>
+    <micronaut-openapi.version>2.1.1</micronaut-openapi.version>
   </properties>
 
   <repositories>
@@ -101,6 +102,12 @@
       <version>${assertj-core.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -121,8 +128,15 @@
               <artifactId>lombok</artifactId>
               <version>${lombok.version}</version>
             </path>
+            <path>
+              <groupId>io.micronaut.openapi</groupId>
+              <artifactId>micronaut-openapi</artifactId>
+              <version>${micronaut-openapi.version}</version>
+            </path>
           </annotationProcessorPaths>
+          <fork>true</fork>
           <compilerArgs>
+            <arg>-J-Dmicronaut.openapi.views.spec=redoc.enabled=true,rapidoc.enabled=true,swagger-ui.enabled=true,swagger-ui.theme=flattop</arg>
             <arg>-Amicronaut.processing.group=com.mn</arg>
             <arg>-Amicronaut.processing.module=mn-stock-broker</arg>
           </compilerArgs>
