@@ -25,3 +25,11 @@ hello:
     greeting:
       de: "Halo"
       en: "Hello"
+jackson:
+  property-naming-strategy: KEBAB_CASE
+  generator:
+    writeNumbersAsStrings: true
+  serialization:
+    writeDatesAsTimestamps: false
+    writeDateTimestampsAsNanoseconds: false
+

@@ -30,4 +30,9 @@ public class HelloWorldController {
         return this.greetingConfiguration.getEn();
     }
 
+    @Get("/greeting")
+    public Greeting greet() {
+        return new Greeting();
+    }
+
 }
