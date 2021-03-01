@@ -6,6 +6,7 @@ import com.mn.broker.store.InMemoryAccountStore;
 import io.micronaut.http.*;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.security.authentication.UsernamePasswordCredentials;
 import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
@@ -37,8 +38,29 @@ class WatchListControllerTest {
     InMemoryAccountStore store;
 
     @Test
+    public void unauthorizedAccessIsForbidden() {
+        try {
+            this.client.toBlocking().retrieve("/account/watchlist");
+        } catch (HttpClientResponseException e) {
+            assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+        }
+    }
+
+    @Test
     public void getEmptyList() {
 
+        final BearerAccessRefreshToken token = getBearerAccessRefreshToken();
+
+        final MutableHttpRequest<Object> request = GET("/account/watchlist");
+        request.accept(MediaType.APPLICATION_JSON).bearerAuth(token.getAccessToken());
+
+        final WatchList watchList = this.client.toBlocking().retrieve(request, WatchList.class);
+
+        assertThat(watchList).isNotNull();
+        assertThat(watchList.getSymbols()).isEmpty();
+    }
+
+    private BearerAccessRefreshToken getBearerAccessRefreshToken() {
         final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("my-user", "secret");
 
         var login = HttpRequest.POST("/login", credentials);
@@ -50,19 +72,13 @@ class WatchListControllerTest {
         assertEquals("my-user", token.getUsername());
 
         LOG.debug("Login user token {} expires in {}", token.getAccessToken(), token.getExpiresIn());
-
-
-        final MutableHttpRequest<Object> request = GET("/account/watchlist");
-        request.accept(MediaType.APPLICATION_JSON).bearerAuth(token.getAccessToken());
-
-        final WatchList watchList = this.client.toBlocking().retrieve(request, WatchList.class);
-
-        assertThat(watchList).isNotNull();
-        assertThat(watchList.getSymbols()).isEmpty();
+        return token;
     }
 
     @Test
     public void getNomEmptyWatchList() {
+        final BearerAccessRefreshToken token = getBearerAccessRefreshToken();
+
         final List<Symbol> symbols = Stream.of("BNP", "VCB", "ACB", "HSBC")
                 .map(Symbol::new)
                 .collect(Collectors.toList());
@@ -70,7 +86,10 @@ class WatchListControllerTest {
         final WatchList watchList = new WatchList(symbols);
         this.store.updateWatchList(WatchListController.ACCOUNT_ID, watchList);
 
-        final WatchList result = this.client.toBlocking().retrieve(GET("/account/watchlist"), WatchList.class);
+        final MutableHttpRequest<Object> request = GET("/account/watchlist");
+        request.accept(MediaType.APPLICATION_JSON).bearerAuth(token.getAccessToken());
+
+        final WatchList result = this.client.toBlocking().retrieve(request, WatchList.class);
 
         assertThat(result).isNotNull();
         assertThat(result.getSymbols()).hasSize(4);
@@ -78,6 +97,8 @@ class WatchListControllerTest {
 
     @Test
     public void updateWatchList() {
+        final BearerAccessRefreshToken token = getBearerAccessRefreshToken();
+
         final List<Symbol> symbols = Stream.of("BNP", "VCB", "ACB", "HSBC")
                 .map(Symbol::new)
                 .collect(Collectors.toList());
@@ -85,7 +106,10 @@ class WatchListControllerTest {
         final WatchList watchList = new WatchList(symbols);
         this.store.updateWatchList(WatchListController.ACCOUNT_ID, watchList);
 
-        final WatchList result = this.client.toBlocking().retrieve(PUT("/account/watchlist", watchList), WatchList.class);
+        final MutableHttpRequest<WatchList> request = PUT("/account/watchlist", watchList);
+        request.accept(MediaType.APPLICATION_JSON).bearerAuth(token.getAccessToken());
+
+        final WatchList result = this.client.toBlocking().retrieve(request, WatchList.class);
 
         assertThat(result).isNotNull();
         assertThat(result.getSymbols()).hasSize(4);
@@ -94,6 +118,8 @@ class WatchListControllerTest {
 
     @Test
     public void deleteWatchList() {
+        final BearerAccessRefreshToken token = getBearerAccessRefreshToken();
+
         final List<Symbol> symbols = Stream.of("BNP", "VCB", "ACB", "HSBC")
                 .map(Symbol::new)
                 .collect(Collectors.toList());
@@ -101,7 +127,12 @@ class WatchListControllerTest {
         final WatchList watchList = new WatchList(symbols);
         final UUID accountId = UUID.randomUUID();
         this.store.updateWatchList(accountId, watchList);
-        final HttpResponse<Object> response = this.client.toBlocking().exchange(DELETE("/account/watchlist/" + accountId));
+
+        final MutableHttpRequest<Object> request = DELETE("/account/watchlist/" + accountId);
+        request.accept(MediaType.APPLICATION_JSON)
+                .bearerAuth(token.getAccessToken());
+
+        final HttpResponse<Object> response = this.client.toBlocking().exchange(request);
 
         assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
     }
