@@ -3,12 +3,15 @@ package com.mn.broker.account;
 import com.mn.broker.model.Symbol;
 import com.mn.broker.model.WatchList;
 import com.mn.broker.store.InMemoryAccountStore;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.HttpStatus;
+import io.micronaut.http.*;
 import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.security.authentication.UsernamePasswordCredentials;
+import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -18,9 +21,13 @@ import java.util.stream.Stream;
 
 import static io.micronaut.http.HttpRequest.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @MicronautTest
 class WatchListControllerTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(WatchListControllerTest.class);
 
     @Inject
     @Client("/")
@@ -31,7 +38,24 @@ class WatchListControllerTest {
 
     @Test
     public void getEmptyList() {
-        final WatchList watchList = this.client.toBlocking().retrieve(GET("/account/watchlist"), WatchList.class);
+
+        final UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("my-user", "secret");
+
+        var login = HttpRequest.POST("/login", credentials);
+        final HttpResponse<BearerAccessRefreshToken> response = client.toBlocking().exchange(login, BearerAccessRefreshToken.class);
+
+        assertEquals(HttpStatus.OK, response.getStatus());
+        final BearerAccessRefreshToken token = response.body();
+        assertNotNull(token);
+        assertEquals("my-user", token.getUsername());
+
+        LOG.debug("Login user token {} expires in {}", token.getAccessToken(), token.getExpiresIn());
+
+
+        final MutableHttpRequest<Object> request = GET("/account/watchlist");
+        request.accept(MediaType.APPLICATION_JSON).bearerAuth(token.getAccessToken());
+
+        final WatchList watchList = this.client.toBlocking().retrieve(request, WatchList.class);
 
         assertThat(watchList).isNotNull();
         assertThat(watchList.getSymbols()).isEmpty();
