@@ -25,7 +25,7 @@ public class AuthenticationProviderPasswordUser implements AuthenticationProvide
             final Object identity = authenticationRequest.getIdentity();
             final Object secret = authenticationRequest.getSecret();
 
-            LOG.debug("User {} tries ti login...", identity);
+            LOG.debug("User {} tries to login...", identity);
 
             if (identity.equals("my-user") && secret.equals("secret")) {
                 emitter.onNext(new UserDetails((String) identity, new ArrayList<>()));

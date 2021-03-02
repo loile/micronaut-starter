@@ -5,22 +5,21 @@ import com.mn.broker.model.WatchList;
 import com.mn.broker.store.InMemoryAccountStore;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
-import io.micronaut.http.client.RxHttpClient;
 import io.micronaut.http.client.annotation.Client;
+import io.micronaut.security.authentication.UsernamePasswordCredentials;
+import io.micronaut.security.token.jwt.render.BearerAccessRefreshToken;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.reactivex.Single;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.logging.Logger;
-import org.junit.platform.commons.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.micronaut.http.HttpRequest.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @MicronautTest
@@ -29,8 +28,8 @@ class WatchListControllerReactiveTest {
     private static final Logger LOG = LoggerFactory.getLogger(WatchListControllerReactiveTest.class);
 
     @Inject
-    @Client("/account/watchlist-reactive")
-    RxHttpClient client;
+    @Client("/")
+    JWTWatchListClient client;
 
     @Inject
     InMemoryAccountStore store;
@@ -50,15 +49,15 @@ class WatchListControllerReactiveTest {
     @Test
     public void getEmptyList() {
         this.store.updateWatchList(WatchListReactiveController.ACCOUNT_ID, new WatchList());
-        final Single<WatchList> watchList = this.client.retrieve(GET("/"), WatchList.class).singleOrError();
 
-        assertThat(watchList).isNotNull();
-        assertThat(watchList.blockingGet().getSymbols()).isEmpty();
+        final Single<WatchList> result = this.client.retrieveWatchList(getAccessToken()).singleOrError();
+
+        assertThat(result.blockingGet().getSymbols()).isEmpty();
     }
 
     @Test
     public void getNonEmptyWatchList() {
-        final Single<WatchList> result = this.client.retrieve(GET("/"), WatchList.class).singleOrError();
+        final Single<WatchList> result = this.client.retrieveWatchList(getAccessToken()).singleOrError();
 
         assertThat(result).isNotNull();
         assertThat(result.blockingGet().getSymbols()).hasSize(4);
@@ -66,26 +65,33 @@ class WatchListControllerReactiveTest {
 
     @Test
     public void getAsSingleWatchList() {
-        final WatchList result = this.client.toBlocking().retrieve(GET("/single"), WatchList.class);
+        final Single<WatchList> result = this.client.retrieveWatchListAsASingle(getAccessToken());
 
         assertThat(result).isNotNull();
-        assertThat(result.getSymbols()).hasSize(4);
+        assertThat(result.blockingGet().getSymbols()).hasSize(4);
     }
 
     @Test
     public void updateWatchList() {
-        final WatchList result = this.client.toBlocking().retrieve(PUT("/", watchList), WatchList.class);
+        final HttpResponse<WatchList> result = this.client.updateWatchList(getAccessToken(), watchList);
 
         assertThat(result).isNotNull();
-        assertThat(result.getSymbols()).hasSize(4);
-        assertThat(result).isEqualTo(watchList);
+        assertThat(result.body().getSymbols()).hasSize(4);
     }
 
     @Test
     public void deleteWatchList() {
-        final HttpResponse<Object> response = this.client.toBlocking().exchange(DELETE("/" + WatchListReactiveController.ACCOUNT_ID));
+        final HttpResponse<WatchList> response = this.client.deleteWatchList(getAccessToken(), WatchListReactiveController.ACCOUNT_ID);
 
         assertThat(response.getStatus().getCode()).isEqualTo(HttpStatus.NO_CONTENT.getCode());
+    }
+
+    private BearerAccessRefreshToken getBearerAccessRefreshToken() {
+        return this.client.login(new UsernamePasswordCredentials("my-user", "secret"));
+    }
+
+    private String getAccessToken() {
+        return "Bearer " + getBearerAccessRefreshToken().getAccessToken();
     }
 
 }
