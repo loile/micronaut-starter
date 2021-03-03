@@ -1,0 +1,23 @@
+version: '3.2'
+
+services:
+  db:
+    image: postgres:12.4
+    environment:
+      # Create db
+      POSTGRES_DB: mn-stock-broker
+      # User postgres/secret user/password credentials
+      POSTGRES_PASSWORD: secret
+      # enforce UTC timezone
+      TZ: UTC
+    volumes:
+      - mn-stock-broker-data-local:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  admirer:
+    image: adminer:4
+    ports:
+      - 8081:8080
+volumes:
+  mn-stock-broker-data-local:
