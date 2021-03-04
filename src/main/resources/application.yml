@@ -51,3 +51,19 @@ flyway:
       clean-schema: false
       schemas: mn
       default-schema: mn
+
+datasources:
+  default:
+    url: ${PG_JDBC_URL:`jdbc:postgresql://127.0.0.1:5432/mn-stock-broker`}
+    username: ${PG_USERNAME:postgres}
+    password: ${PG_PASSWORD:secret}
+    driver-class-name: org.postgresql.Driver
+    schema-generate: NONE
+
+jpa:
+  default:
+    packages-to-scan:
+      - "com.mn.broker.persistence"
+    properties:
+      hibernate:
+        show_sql: false
