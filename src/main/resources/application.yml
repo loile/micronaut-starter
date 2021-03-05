@@ -63,8 +63,6 @@ datasources:
 
 jpa:
   default:
-    packages-to-scan:
-      - "com.mn.broker.persistence"
     properties:
       hibernate:
-        show_sql: false
+        show_sql: true
