@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Entity(name = "symbol")
+@Entity
 @Table(name = "symbols", schema = "mn")
 @Data
 @AllArgsConstructor
