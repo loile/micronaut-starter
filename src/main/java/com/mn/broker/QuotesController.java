@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Secured({SecurityRule.IS_ANONYMOUS})
@@ -58,5 +59,10 @@ public class QuotesController {
     @Get("/ordered/asc")
     public List<QuoteDTO> orderedAsc() {
         return this.quotesRepository.listOrderByVolumeAsc();
+    }
+
+    @Get("/volume/{volume}")
+    public List<QuoteDTO> volumeFilter(@PathVariable BigDecimal volume) {
+        return this.quotesRepository.findByVolumeGreaterThanOrderByVolumeAsc(volume);
     }
 }
