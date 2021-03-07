@@ -44,6 +44,7 @@ public class TestDataProvider {
                         .ask(randomValue())
                         .bid(randomValue())
                         .lastPrice(randomValue())
+                        .volume(randomValue())
                         .build();
 
                 quotesRepository.save(quoteEntity);

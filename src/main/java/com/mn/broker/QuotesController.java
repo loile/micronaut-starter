@@ -48,4 +48,14 @@ public class QuotesController {
     public List<QuoteEntity> getAllQuotesViaJPA() {
         return quotesRepository.findAll();
     }
+
+    @Get("/ordered/desc")
+    public List<QuoteEntity> orderedDesc() {
+        return this.quotesRepository.listOrderByVolumeDesc();
+    }
+
+    @Get("/ordered/asc")
+    public List<QuoteEntity> orderedAsc() {
+        return this.quotesRepository.listOrderByVolumeAsc();
+    }
 }
