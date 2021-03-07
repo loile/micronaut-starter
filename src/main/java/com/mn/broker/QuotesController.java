@@ -1,6 +1,7 @@
 package com.mn.broker;
 
 import com.mn.broker.model.Quote;
+import com.mn.broker.persistence.QuoteDTO;
 import com.mn.broker.persistence.QuoteEntity;
 import com.mn.broker.persistence.QuotesRepository;
 import com.mn.broker.store.InMemoryStore;
@@ -50,12 +51,12 @@ public class QuotesController {
     }
 
     @Get("/ordered/desc")
-    public List<QuoteEntity> orderedDesc() {
+    public List<QuoteDTO> orderedDesc() {
         return this.quotesRepository.listOrderByVolumeDesc();
     }
 
     @Get("/ordered/asc")
-    public List<QuoteEntity> orderedAsc() {
+    public List<QuoteDTO> orderedAsc() {
         return this.quotesRepository.listOrderByVolumeAsc();
     }
 }

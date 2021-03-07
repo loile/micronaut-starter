@@ -11,7 +11,7 @@ public interface QuotesRepository extends CrudRepository<QuoteEntity, Integer> {
     @Override
     List<QuoteEntity> findAll();
 
-    List<QuoteEntity> listOrderByVolumeDesc();
+    List<QuoteDTO> listOrderByVolumeDesc();
 
-    List<QuoteEntity> listOrderByVolumeAsc();
+    List<QuoteDTO> listOrderByVolumeAsc();
 }
