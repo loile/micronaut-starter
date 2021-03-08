@@ -58,7 +58,7 @@ datasources:
     username: ${PG_USERNAME:postgres}
     password: ${PG_PASSWORD:secret}
     driver-class-name: org.postgresql.Driver
-    schema-generate: NONE
+    schema-generate: CREATE-DROP
     dialect: POSTGRES
 
 jpa:
